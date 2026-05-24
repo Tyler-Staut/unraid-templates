@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <Container version="2">
   <Name>Astronomer</Name>
-  <Repository>quay.io/astronomer/astro-runtime:12.8.0</Repository>
-  <Registry>https://quay.io/repository/astronomer/astro-runtime</Registry>
+  <Repository>astrocrpublic.azurecr.io/runtime:3.2-4</Repository>
+  <Registry>https://astrocrpublic.azurecr.io</Registry>
   <Network>bridge</Network>
   <MyIP/>
   <Shell>bash</Shell>
@@ -25,14 +25,10 @@
 
   <Config Name="Airflow Web UI" Target="8080" Default="" Mode="tcp" Description="Airflow webserver port" Type="Port" Display="always" Required="true" Mask="false">8080</Config>
 
-  <Config Name="Airflow Home" Target="/usr/local/airflow" Default="" Mode="rw" Description="Persist full AIRFLOW_HOME (DB, config, DAGs, logs, plugins, and auth state)" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/astronomer</Config>
-  <Config Name="DAGs" Target="/usr/local/airflow/dags" Default="" Mode="rw" Description="Folder for your DAG files" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/airflow/dags</Config>
-  <Config Name="Logs" Target="/usr/local/airflow/logs" Default="" Mode="rw" Description="Airflow logs" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/airflow/logs</Config>
-  <Config Name="Plugins" Target="/usr/local/airflow/plugins" Default="" Mode="rw" Description="Airflow plugins" Type="Path" Display="always" Required="false" Mask="false">/mnt/user/appdata/airflow/plugins</Config>
-  <Config Name="Config" Target="/usr/local/airflow/config" Default="" Mode="rw" Description="Optional Airflow config directory" Type="Path" Display="always" Required="false" Mask="false">/mnt/user/appdata/airflow/config</Config>
+  <Config Name="Airflow Home" Target="/usr/local/airflow" Default="" Mode="rw" Description="Persist AIRFLOW_HOME, including airflow.cfg, metadata DB, DAGs, logs, plugins, and config" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/astronomer</Config>
 
   <Config Name="Load Example DAGs" Target="AIRFLOW__CORE__LOAD_EXAMPLES" Default="False" Mode="" Description="Set to True to load Airflow example DAGs" Type="Variable" Display="always" Required="false" Mask="false">False</Config>
-  <Config Name="Executor" Target="AIRFLOW__CORE__EXECUTOR" Default="SequentialExecutor" Mode="" Description="Executor class for standalone deployments" Type="Variable" Display="always" Required="false" Mask="false">SequentialExecutor</Config>
+  <Config Name="Executor" Target="AIRFLOW__CORE__EXECUTOR" Default="LocalExecutor" Mode="" Description="Executor class for standalone deployments" Type="Variable" Display="always" Required="false" Mask="false">LocalExecutor</Config>
   <Config Name="Admin Username" Target="_AIRFLOW_WWW_USER_USERNAME" Default="admin" Mode="" Description="Airflow admin username" Type="Variable" Display="always" Required="false" Mask="false">admin</Config>
   <Config Name="Admin Password" Target="_AIRFLOW_WWW_USER_PASSWORD" Default="admin" Mode="" Description="Airflow admin password (change this)" Type="Variable" Display="always" Required="false" Mask="true">admin</Config>
 
