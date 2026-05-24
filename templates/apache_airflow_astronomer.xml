@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <Container version="2">
-  <Name>Apache Airflow (Astronomer Runtime)</Name>
+  <Name>Astronomer</Name>
   <Repository>quay.io/astronomer/astro-runtime:12.8.0</Repository>
   <Registry>https://quay.io/repository/astronomer/astro-runtime</Registry>
   <Network>bridge</Network>
