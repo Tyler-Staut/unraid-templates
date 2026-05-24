@@ -9,7 +9,9 @@
   <Privileged>false</Privileged>
   <Support>https://www.astronomer.io/docs/astro/runtime-image-architecture</Support>
   <Project>https://airflow.apache.org/</Project>
-  <Overview>Run Apache Airflow on Unraid using Astronomer Runtime. This template starts Airflow in standalone mode for single-node deployments and development/home-lab use, with the full AIRFLOW_HOME persisted to keep metadata and users across container recreation.</Overview>
+
+  <Overview>Run Apache Airflow on Unraid using Astronomer Runtime. This template starts Airflow in standalone mode for single-node deployments and development/home-lab use.</Overview>
+
   <Category>Productivity: Tools:</Category>
   <WebUI>http://[IP]:[PORT:8080]</WebUI>
   <TemplateURL/>
@@ -22,7 +24,12 @@
   <Requires/>
 
   <Config Name="Airflow Web UI" Target="8080" Default="" Mode="tcp" Description="Airflow webserver port" Type="Port" Display="always" Required="true" Mask="false">8080</Config>
+
   <Config Name="Airflow Home" Target="/usr/local/airflow" Default="" Mode="rw" Description="Persist full AIRFLOW_HOME (DB, config, DAGs, logs, plugins, and auth state)" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/astronomer</Config>
+  <Config Name="DAGs" Target="/usr/local/airflow/dags" Default="" Mode="rw" Description="Folder for your DAG files" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/airflow/dags</Config>
+  <Config Name="Logs" Target="/usr/local/airflow/logs" Default="" Mode="rw" Description="Airflow logs" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/airflow/logs</Config>
+  <Config Name="Plugins" Target="/usr/local/airflow/plugins" Default="" Mode="rw" Description="Airflow plugins" Type="Path" Display="always" Required="false" Mask="false">/mnt/user/appdata/airflow/plugins</Config>
+  <Config Name="Config" Target="/usr/local/airflow/config" Default="" Mode="rw" Description="Optional Airflow config directory" Type="Path" Display="always" Required="false" Mask="false">/mnt/user/appdata/airflow/config</Config>
 
   <Config Name="Load Example DAGs" Target="AIRFLOW__CORE__LOAD_EXAMPLES" Default="False" Mode="" Description="Set to True to load Airflow example DAGs" Type="Variable" Display="always" Required="false" Mask="false">False</Config>
   <Config Name="Executor" Target="AIRFLOW__CORE__EXECUTOR" Default="SequentialExecutor" Mode="" Description="Executor class for standalone deployments" Type="Variable" Display="always" Required="false" Mask="false">SequentialExecutor</Config>
