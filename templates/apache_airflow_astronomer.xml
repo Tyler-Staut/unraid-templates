@@ -15,7 +15,7 @@
   <Category>Productivity: Tools:</Category>
   <WebUI>http://[IP]:[PORT:8080]</WebUI>
   <TemplateURL/>
-  <Icon>https://airflow.apache.org/docs/apache-airflow/stable/_images/pin_large.png</Icon>
+  <Icon>https://www.astronomer.io/images/logos/astronomer-mark-purple.png</Icon>
   <ExtraParams/>
   <PostArgs>bash -lc "airflow standalone"</PostArgs>
   <CPUset/>
