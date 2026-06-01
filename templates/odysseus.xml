@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>Odysseus</Name>
+  <Repository>python:3.12-slim</Repository>
+  <Registry>https://hub.docker.com/_/python</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/pewdiepie-archdaemon/odysseus/issues</Support>
+  <Project>https://github.com/pewdiepie-archdaemon/odysseus</Project>
+
+  <Overview>Run Odysseus, a self-hosted AI workspace, on Unraid. The upstream repository currently has a Dockerfile that starts FROM python:3.12-slim but does not publish a ready-to-pull Odysseus image/package, so this template intentionally uses that same Python base image and bootstraps the upstream source into /app from GitHub on first start. First start can take several minutes while Debian packages and Python dependencies are installed. Keep authentication enabled for LAN/reverse-proxy deployments and set ODYSSEUS_ADMIN_PASSWORD before first boot if you do not want Odysseus to generate the initial admin password. For Ollama on the Unraid host, start Ollama with OLLAMA_HOST=0.0.0.0:11434 and use http://host.docker.internal:11434/v1 as the Ollama base URL. Optional companion services such as SearXNG, ChromaDB, and ntfy should be run as separate Unraid containers, then point the matching variables below at those services.</Overview>
+
+  <Category>Productivity: Tools:</Category>
+  <WebUI>http://[IP]:[PORT:7000]</WebUI>
+  <TemplateURL/>
+  <Icon>https://avatars.githubusercontent.com/u/225098321?s=200&amp;v=4</Icon>
+  <ExtraParams>--add-host=host.docker.internal:host-gateway</ExtraParams>
+  <PostArgs>sh -lc 'set -e; export DEBIAN_FRONTEND=noninteractive; if ! command -v git &gt;/dev/null 2&gt;&amp;1 || ! command -v gosu &gt;/dev/null 2&gt;&amp;1; then apt-get update &amp;&amp; apt-get install -y --no-install-recommends build-essential cmake curl git nodejs npm tmux openssh-client gosu &amp;&amp; rm -rf /var/lib/apt/lists/*; fi; if [ ! -f /app/app.py ]; then rm -rf /tmp/odysseus &amp;&amp; git clone --depth 1 https://github.com/pewdiepie-archdaemon/odysseus.git /tmp/odysseus &amp;&amp; cp -a /tmp/odysseus/. /app/; fi; cd /app; pip install --no-cache-dir -r requirements.txt; mkdir -p data logs services/cache/search services/cache/content .ssh .cache/huggingface .local; uid="${PUID:-99}"; gid="${PGID:-100}"; if ! getent group "$gid" &gt;/dev/null 2&gt;&amp;1; then groupadd -g "$gid" odysseus; fi; if ! getent passwd "$uid" &gt;/dev/null 2&gt;&amp;1; then useradd -u "$uid" -g "$gid" -M -s /bin/sh -d /app odysseus; fi; chown -R "$uid:$gid" /app; export VLLM_USE_FLASHINFER_SAMPLER="${VLLM_USE_FLASHINFER_SAMPLER:-0}"; exec gosu "$uid:$gid" uvicorn app:app --host 0.0.0.0 --port 7000'</PostArgs>
+  <CPUset/>
+  <DonateText/>
+  <DonateLink/>
+  <Requires/>
+
+  <Config Name="Web UI" Target="7000" Default="" Mode="tcp" Description="Odysseus web UI port" Type="Port" Display="always" Required="true" Mask="false">7000</Config>
+
+  <Config Name="Application Source" Target="/app" Default="" Mode="rw" Description="Persist the cloned Odysseus source tree. To update to the latest upstream code, stop the container, back up this directory, remove the source files, and start the container again." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/odysseus/app</Config>
+  <Config Name="Data" Target="/app/data" Default="" Mode="rw" Description="Persist Odysseus app data, SQLite database, generated SSH identity, auth state, uploads, and related runtime data." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/odysseus/data</Config>
+  <Config Name="Logs" Target="/app/logs" Default="" Mode="rw" Description="Persist Odysseus logs." Type="Path" Display="always" Required="false" Mask="false">/mnt/user/appdata/odysseus/logs</Config>
+  <Config Name="SSH Identity" Target="/app/.ssh" Default="" Mode="rw" Description="Persist the Cookbook remote-server SSH identity generated or used by Odysseus." Type="Path" Display="advanced" Required="false" Mask="false">/mnt/user/appdata/odysseus/ssh</Config>
+  <Config Name="HuggingFace Cache" Target="/app/.cache/huggingface" Default="" Mode="rw" Description="Persist local model/cache downloads used by Cookbook and local model workflows." Type="Path" Display="advanced" Required="false" Mask="false">/mnt/user/appdata/odysseus/huggingface</Config>
+  <Config Name="Local Python Packages" Target="/app/.local" Default="" Mode="rw" Description="Persist Cookbook-installed Python CLIs/packages such as vLLM and llama-cpp-python." Type="Path" Display="advanced" Required="false" Mask="false">/mnt/user/appdata/odysseus/local</Config>
+  <Config Name="Search Cache" Target="/app/services/cache/search" Default="" Mode="rw" Description="Persist Odysseus search cache data." Type="Path" Display="advanced" Required="false" Mask="false">/mnt/user/appdata/odysseus/search-cache</Config>
+
+  <Config Name="PUID" Target="PUID" Default="99" Mode="" Description="UID used to run Odysseus after startup bootstrapping. This mirrors upstream PUID behavior; Unraid's nobody user is usually 99." Type="Variable" Display="always" Required="false" Mask="false">99</Config>
+  <Config Name="PGID" Target="PGID" Default="100" Mode="" Description="GID used to run Odysseus after startup bootstrapping. This mirrors upstream PGID behavior; Unraid's users group is usually 100." Type="Variable" Display="always" Required="false" Mask="false">100</Config>
+
+  <Config Name="LLM Host" Target="LLM_HOST" Default="localhost" Mode="" Description="Primary LLM host. For a model server on the Unraid host, use host.docker.internal or the Unraid server IP." Type="Variable" Display="always" Required="false" Mask="false">host.docker.internal</Config>
+  <Config Name="LLM Hosts" Target="LLM_HOSTS" Default="" Mode="" Description="Optional comma-separated list of additional LLM hosts for model discovery." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="Ollama Base URL" Target="OLLAMA_BASE_URL" Default="" Mode="" Description="Optional OpenAI-compatible Ollama base URL. For Ollama on the Unraid host, use http://host.docker.internal:11434/v1." Type="Variable" Display="always" Required="false" Mask="false">http://host.docker.internal:11434/v1</Config>
+  <Config Name="OpenAI API Key" Target="OPENAI_API_KEY" Default="" Mode="" Description="Optional OpenAI API key. Prefer adding providers in the app unless you want to pre-seed this secret." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="Research LLM Endpoint" Target="RESEARCH_LLM_ENDPOINT" Default="" Mode="" Description="Optional research service LLM endpoint, for example http://host.docker.internal:8000/v1/chat/completions." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+
+  <Config Name="SearXNG Instance" Target="SEARXNG_INSTANCE" Default="http://localhost:8080" Mode="" Description="SearXNG URL for web search. Run SearXNG separately on Unraid and point this at it, for example http://host.docker.internal:8080." Type="Variable" Display="always" Required="false" Mask="false">http://host.docker.internal:8080</Config>
+  <Config Name="SearXNG Secret" Target="SEARXNG_SECRET" Default="" Mode="" Description="Optional SearXNG cookie/CSRF secret if you need to pin it." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+
+  <Config Name="Database URL" Target="DATABASE_URL" Default="sqlite:///./data/app.db" Mode="" Description="Database connection URL. Default keeps the SQLite database inside the persisted /app/data path." Type="Variable" Display="advanced" Required="false" Mask="false">sqlite:///./data/app.db</Config>
+  <Config Name="Authentication Enabled" Target="AUTH_ENABLED" Default="true" Mode="" Description="Enable Odysseus login. Keep true for Docker, LAN, reverse proxy, and shared deployments." Type="Variable" Display="always" Required="false" Mask="false">true</Config>
+  <Config Name="Localhost Auth Bypass" Target="LOCALHOST_BYPASS" Default="false" Mode="" Description="Development-only auth bypass for loopback requests. Keep false on Unraid." Type="Variable" Display="advanced" Required="false" Mask="false">false</Config>
+  <Config Name="Initial Admin Password" Target="ODYSSEUS_ADMIN_PASSWORD" Default="" Mode="" Description="Optional first admin password to seed during setup. Set before first boot if you do not want a generated initial password." Type="Variable" Display="always" Required="false" Mask="true"/>
+  <Config Name="Allowed Origins" Target="ALLOWED_ORIGINS" Default="" Mode="" Description="Optional comma-separated CORS allowed origins. For reverse proxy/public use, restrict this to your exact external origin." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+
+  <Config Name="ChromaDB Host" Target="CHROMADB_HOST" Default="localhost" Mode="" Description="ChromaDB service host. Run ChromaDB separately on Unraid and use host.docker.internal or the ChromaDB container IP/name if routable." Type="Variable" Display="always" Required="false" Mask="false">host.docker.internal</Config>
+  <Config Name="ChromaDB Port" Target="CHROMADB_PORT" Default="8100" Mode="" Description="ChromaDB service port. Odysseus compose maps host port 8100 to ChromaDB container port 8000." Type="Variable" Display="always" Required="false" Mask="false">8100</Config>
+
+  <Config Name="Embedding URL" Target="EMBEDDING_URL" Default="" Mode="" Description="Optional OpenAI-compatible /v1/embeddings endpoint. Default is derived from LLM_HOST and Ollama's 11434 port." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="Embedding Model" Target="EMBEDDING_MODEL" Default="all-minilm:l6-v2" Mode="" Description="Embedding model name that must be available at EMBEDDING_URL." Type="Variable" Display="advanced" Required="false" Mask="false">all-minilm:l6-v2</Config>
+  <Config Name="FastEmbed Model" Target="FASTEMBED_MODEL" Default="sentence-transformers/all-MiniLM-L6-v2" Mode="" Description="Local fallback embedding model used when no HTTP embedding API is available. Downloads on first use." Type="Variable" Display="advanced" Required="false" Mask="false">sentence-transformers/all-MiniLM-L6-v2</Config>
+  <Config Name="FastEmbed Cache Path" Target="FASTEMBED_CACHE_PATH" Default="" Mode="" Description="Optional FastEmbed cache path. Leave blank to use the default cache inside the container." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+
+  <Config Name="Cleanup Interval Hours" Target="CLEANUP_INTERVAL_HOURS" Default="24" Mode="" Description="Cleanup interval in hours." Type="Variable" Display="advanced" Required="false" Mask="false">24</Config>
+  <Config Name="In-process Email Pollers" Target="ODYSSEUS_INPROCESS_POLLERS" Default="1" Mode="" Description="Set to 0 only if an external cron/systemd driver runs Odysseus mail pollers." Type="Variable" Display="advanced" Required="false" Mask="false">1</Config>
+  <Config Name="In-process Task Runner" Target="ODYSSEUS_INPROCESS_TASKS" Default="1" Mode="" Description="Set to 0 only if an external driver fires scheduled tasks." Type="Variable" Display="advanced" Required="false" Mask="false">1</Config>
+  <Config Name="Script Host" Target="ODYSSEUS_SCRIPT_HOST" Default="localhost" Mode="" Description="Host used by the built-in run_script scheduled-task action. Empty/local/localhost runs scripts inside the app container; set an SSH host alias for remote execution." Type="Variable" Display="advanced" Required="false" Mask="false">localhost</Config>
+
+  <TailscaleStateDir/>
+</Container>
