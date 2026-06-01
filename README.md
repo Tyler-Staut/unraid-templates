@@ -10,6 +10,8 @@ Each template in this repository is intended to be imported and maintained as pa
   Apache Airflow (Astronomer Runtime) in standalone mode for home-lab and development use.
 - **Alloy** (`templates/grafana_alloy.xml`)  
   Grafana Alloy OpenTelemetry pipeline collector.
+- **Odysseus** (`templates/odysseus.xml`)  
+  Self-hosted AI workspace template that bootstraps the upstream Odysseus Docker source workflow on Unraid.
 
 ## Repository layout
 
