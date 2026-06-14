@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>Plane AIO</Name>
+  <Repository>artifacts.plane.so/makeplane/plane-aio-commercial:stable</Repository>
+  <Registry>https://developers.plane.so/self-hosting/methods/docker-aio</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>bash</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/makeplane/plane/issues</Support>
+  <Project>https://plane.so/</Project>
+
+  <Overview>Run Plane, an open-source project and product-management platform, on Unraid with Plane's official all-in-one Docker image. This container bundles the Plane web app, API, live service, workers, proxy, and email intake services, but Plane still requires external PostgreSQL, Redis, RabbitMQ, and S3-compatible object storage such as MinIO. Create those services separately before first start, then set DATABASE_URL, REDIS_URL, AMQP_URL, and the S3 variables below. For a simple LAN install, set Domain Name to your Unraid server IP or DNS name and set Web URL/CORS origins to the exact URL you will open, for example http://tower.local:8080 or http://192.168.1.10:8080. For production or public access, use a reverse proxy, HTTPS, strong unique secrets, and an external backup plan.</Overview>
+
+  <Category>Productivity: Tools:</Category>
+  <WebUI>http://[IP]:[PORT:80]</WebUI>
+  <TemplateURL/>
+  <Icon>https://avatars.githubusercontent.com/u/91017694?s=200&amp;v=4</Icon>
+  <ExtraParams/>
+  <PostArgs/>
+  <CPUset/>
+  <DonateText/>
+  <DonateLink/>
+  <Requires>Requires external PostgreSQL, Redis, RabbitMQ, and S3-compatible storage (for example MinIO) containers or services.</Requires>
+
+  <Config Name="Web UI HTTP" Target="80" Default="8080" Mode="tcp" Description="Plane HTTP web interface. Map to an unused Unraid host port such as 8080." Type="Port" Display="always" Required="true" Mask="false">8080</Config>
+  <Config Name="Web UI HTTPS" Target="443" Default="8443" Mode="tcp" Description="Optional Plane HTTPS port when SSL is configured inside the container. Many Unraid installs leave this disabled and use an external reverse proxy instead." Type="Port" Display="advanced" Required="false" Mask="false">8443</Config>
+  <Config Name="SMTP Port 25" Target="20025" Default="20025" Mode="tcp" Description="Optional Plane intake email SMTP port 25 mapping." Type="Port" Display="advanced" Required="false" Mask="false">20025</Config>
+  <Config Name="SMTP Port 465" Target="20465" Default="20465" Mode="tcp" Description="Optional Plane intake email SMTPS port 465 mapping." Type="Port" Display="advanced" Required="false" Mask="false">20465</Config>
+  <Config Name="SMTP Port 587" Target="20587" Default="20587" Mode="tcp" Description="Optional Plane intake email submission port 587 mapping." Type="Port" Display="advanced" Required="false" Mask="false">20587</Config>
+
+  <Config Name="Logs" Target="/app/logs" Default="" Mode="rw" Description="Persist Plane service logs." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/plane/logs</Config>
+  <Config Name="Data" Target="/app/data" Default="" Mode="rw" Description="Persist Plane runtime data used by the all-in-one image." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/plane/data</Config>
+  <Config Name="Monitor DB" Target="/app/monitor" Default="" Mode="rw" Description="Persist Plane monitor/workspace license database state." Type="Path" Display="advanced" Required="false" Mask="false">/mnt/user/appdata/plane/monitor</Config>
+  <Config Name="Email TLS Certificates" Target="/app/email/tls" Default="" Mode="ro" Description="Optional TLS certificates for the built-in email intake service. Set TLS_CERT_PATH and TLS_PRIV_KEY_PATH when using this mount." Type="Path" Display="advanced" Required="false" Mask="false">/mnt/user/appdata/plane/email-tls</Config>
+
+  <Config Name="Domain Name" Target="DOMAIN_NAME" Default="localhost" Mode="" Description="Primary domain name or IP address for this Plane instance, without protocol. For LAN-only usage this can be your Unraid server IP or DNS name." Type="Variable" Display="always" Required="true" Mask="false">localhost</Config>
+  <Config Name="Web URL" Target="WEB_URL" Default="http://localhost:8080" Mode="" Description="Complete base URL users will use to access Plane, including protocol and host port." Type="Variable" Display="always" Required="true" Mask="false">http://localhost:8080</Config>
+  <Config Name="CORS Allowed Origins" Target="CORS_ALLOWED_ORIGINS" Default="http://localhost:8080" Mode="" Description="Comma-separated allowed browser origins. Usually this should match WEB_URL exactly." Type="Variable" Display="always" Required="true" Mask="false">http://localhost:8080</Config>
+  <Config Name="Site Address" Target="SITE_ADDRESS" Default=":80" Mode="" Description="Caddy site address inside the AIO container. Leave :80 for HTTP behind Unraid port mapping or a reverse proxy." Type="Variable" Display="advanced" Required="false" Mask="false">:80</Config>
+  <Config Name="App Protocol" Target="APP_PROTOCOL" Default="http" Mode="" Description="Protocol used by Plane. Use http for LAN/reverse-proxy HTTP to the container; use https only when SSL is configured." Type="Variable" Display="advanced" Required="false" Mask="false">http</Config>
+  <Config Name="Trusted Proxies" Target="TRUSTED_PROXIES" Default="0.0.0.0/0" Mode="" Description="CIDR ranges trusted for forwarded headers when behind a reverse proxy." Type="Variable" Display="advanced" Required="false" Mask="false">0.0.0.0/0</Config>
+
+  <Config Name="Database URL" Target="DATABASE_URL" Default="postgresql://plane:plane@host.docker.internal:5432/plane" Mode="" Description="PostgreSQL connection string. Run PostgreSQL separately and use host.docker.internal, the Unraid server IP, or a routable container hostname/IP." Type="Variable" Display="always" Required="true" Mask="true">postgresql://plane:plane@host.docker.internal:5432/plane</Config>
+  <Config Name="Redis URL" Target="REDIS_URL" Default="redis://host.docker.internal:6379" Mode="" Description="Redis connection string for cache and sessions." Type="Variable" Display="always" Required="true" Mask="false">redis://host.docker.internal:6379</Config>
+  <Config Name="RabbitMQ URL" Target="AMQP_URL" Default="amqp://plane:plane@host.docker.internal:5672/plane" Mode="" Description="RabbitMQ AMQP connection string." Type="Variable" Display="always" Required="true" Mask="true">amqp://plane:plane@host.docker.internal:5672/plane</Config>
+
+  <Config Name="AWS Region" Target="AWS_REGION" Default="us-east-1" Mode="" Description="S3 region for object storage. For MinIO, us-east-1 is commonly accepted." Type="Variable" Display="always" Required="true" Mask="false">us-east-1</Config>
+  <Config Name="S3 Access Key" Target="AWS_ACCESS_KEY_ID" Default="" Mode="" Description="S3 or MinIO access key." Type="Variable" Display="always" Required="true" Mask="true"/>
+  <Config Name="S3 Secret Key" Target="AWS_SECRET_ACCESS_KEY" Default="" Mode="" Description="S3 or MinIO secret key." Type="Variable" Display="always" Required="true" Mask="true"/>
+  <Config Name="S3 Bucket" Target="AWS_S3_BUCKET_NAME" Default="plane-app" Mode="" Description="S3 or MinIO bucket name for Plane uploads." Type="Variable" Display="always" Required="true" Mask="false">plane-app</Config>
+  <Config Name="S3 Endpoint URL" Target="AWS_S3_ENDPOINT_URL" Default="http://host.docker.internal:9000" Mode="" Description="Endpoint URL for S3-compatible storage such as MinIO. Leave blank only when using AWS S3's standard endpoint." Type="Variable" Display="always" Required="false" Mask="false">http://host.docker.internal:9000</Config>
+  <Config Name="File Size Limit" Target="FILE_SIZE_LIMIT" Default="5242880" Mode="" Description="Maximum upload size in bytes. Default is 5 MiB." Type="Variable" Display="advanced" Required="false" Mask="false">5242880</Config>
+
+  <Config Name="Machine Signature" Target="MACHINE_SIGNATURE" Default="" Mode="" Description="Optional unique instance identifier. Leave blank to let Plane generate one, or set a stable unique value before first start." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="Secret Key" Target="SECRET_KEY" Default="" Mode="" Description="Django/JWT secret key. Set a long random value for production; Plane provides a default if omitted." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="Live Server Secret Key" Target="LIVE_SERVER_SECRET_KEY" Default="" Mode="" Description="Secret used between API and live service. Set a long random value for production." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="Silo HMAC Secret Key" Target="SILO_HMAC_SECRET_KEY" Default="" Mode="" Description="Secret for Silo integration request authentication. Set a long random value for production." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="AES Secret Key" Target="AES_SECRET_KEY" Default="" Mode="" Description="Secret used to encrypt sensitive integration credentials at rest. Set a long random value for production." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+
+  <Config Name="Intake Email Domain" Target="INTAKE_EMAIL_DOMAIN" Default="" Mode="" Description="Optional domain for Plane intake email addresses, for example intake.example.com." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="SMTP Domain" Target="SMTP_DOMAIN" Default="0.0.0.0" Mode="" Description="SMTP server bind/domain setting for Plane intake email." Type="Variable" Display="advanced" Required="false" Mask="false">0.0.0.0</Config>
+  <Config Name="TLS Certificate Path" Target="TLS_CERT_PATH" Default="" Mode="" Description="Optional path inside the container to the email TLS certificate, such as /app/email/tls/fullchain.pem." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="TLS Private Key Path" Target="TLS_PRIV_KEY_PATH" Default="" Mode="" Description="Optional path inside the container to the email TLS private key, such as /app/email/tls/privkey.pem." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+
+  <Config Name="GitHub Client ID" Target="GITHUB_CLIENT_ID" Default="" Mode="" Description="Optional GitHub OAuth integration client ID." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="GitHub Client Secret" Target="GITHUB_CLIENT_SECRET" Default="" Mode="" Description="Optional GitHub OAuth integration client secret." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="Slack Client ID" Target="SLACK_CLIENT_ID" Default="" Mode="" Description="Optional Slack integration client ID." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="Slack Client Secret" Target="SLACK_CLIENT_SECRET" Default="" Mode="" Description="Optional Slack integration client secret." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="GitLab Client ID" Target="GITLAB_CLIENT_ID" Default="" Mode="" Description="Optional GitLab integration client ID." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="GitLab Client Secret" Target="GITLAB_CLIENT_SECRET" Default="" Mode="" Description="Optional GitLab integration client secret." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+
+  <TailscaleStateDir/>
+</Container>
